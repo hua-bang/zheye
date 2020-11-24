@@ -28,6 +28,7 @@
 </template>
 <script lang="ts">
 import { ref, defineComponent } from 'vue'
+import { useRouter } from 'vue-router'
 import ValidateInput, { RulesProp } from '../components/ValidateInput.vue'
 import ValidateForm from '../components/ValidateForm.vue'
 export default defineComponent({
@@ -37,6 +38,7 @@ export default defineComponent({
     ValidateForm
   },
   setup (props) {
+    const router = useRouter()
     const emailVal = ref('132456@qq.com')
     const passwordVal = ref('123456')
     const emailRules: RulesProp = [
@@ -48,6 +50,9 @@ export default defineComponent({
     ]
     const onFormSubmit = (res: boolean) => {
       console.log(res)
+      if (res) {
+        router.push({ name: 'column', params: { id: 1 } })
+      }
     }
     return {
       emailRules,
