@@ -1,5 +1,6 @@
 <template>
   <div class="home-page">
+    <h2>{{biggerColumnLen}}</h2>
     <section class="py-5 text-center container">
       <div class="row py-lg-5">
         <div class="col-lg-6 col-md-8 mx-auto">
@@ -23,33 +24,10 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, computed } from 'vue'
 import ColumnList, { ColumnProps } from '../components/ColumnList.vue'
-const testData: ColumnProps[] = [
-  {
-    id: 1,
-    title: 'vue专栏',
-    description: '这是vue专栏的描述信息'
-  },
-  {
-    id: 2,
-    title: 'react专栏',
-    description: '这是react专栏的描述信息',
-    avatar: 'https://cn.vuejs.org/images/logo.png'
-  },
-  {
-    id: 3,
-    title: 'react专栏',
-    description: '这是react专栏的描述信息',
-    avatar: 'https://cn.vuejs.org/images/logo.png'
-  },
-  {
-    id: 4,
-    title: 'react专栏',
-    description: '这是react专栏的描述信息',
-    avatar: 'https://cn.vuejs.org/images/logo.png'
-  }
-]
+import { useStore } from 'vuex'
+import { GlobalDataProps } from '../store'
 export default defineComponent({
   name: 'home',
   components: {
@@ -57,8 +35,12 @@ export default defineComponent({
   },
   setup (props) {
     console.log(props)
+    const store = useStore<GlobalDataProps>()
+    const list = computed(() => store.state.columns)
+    const biggerColumnLen = computed(() => store.getters.biggerColumnsLen)
     return {
-      list: testData
+      list,
+      biggerColumnLen
     }
   }
 })
