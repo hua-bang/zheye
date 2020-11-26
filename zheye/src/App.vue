@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import { defineComponent, reactive, ref, onMounted, computed } from 'vue'
-import { ColumnProps } from './components/ColumnList.vue'
+import { ColumnProps } from './store'
 import GlobalHeader, { UserProps } from './components/GlobalHeader.vue'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { useStore } from 'vuex'
