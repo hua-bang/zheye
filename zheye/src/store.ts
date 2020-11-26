@@ -1,6 +1,5 @@
-import { createStore } from 'vuex'
+import { Commit, createStore } from 'vuex'
 import axios from 'axios'
-import { testData, testPosts } from './testData'
 interface UserProps {
   isLogin: boolean;
   name?: string;
@@ -19,22 +18,29 @@ export interface ColumnProps {
   description: string;
 }
 export interface PostProps {
-  id: number;
+  _id: string;
   title: string;
-  content: string;
-  image?: string;
+  excerpt?: string;
+  content?: string;
+  image?: ImageProps;
   createdAt: string;
-  columnId: number;
+  column: string;
+}
+const getAndCommit = async (url: string, mutationName: string, commit: Commit) => {
+  const data = await axios.get(url)
+  commit(mutationName, data.data)
 }
 export interface GlobalDataProps {
+  loading: boolean;
   columns: ColumnProps[];
   posts: PostProps[];
   user: UserProps;
 }
-const store = createStore({
+const store = createStore<GlobalDataProps>({
   state: {
+    loading: false,
     columns: [],
-    posts: testPosts,
+    posts: [],
     user: { isLogin: true, name: 'hug', id: 0, columnId: 1 }
   },
   mutations: {
@@ -46,24 +52,34 @@ const store = createStore({
     },
     fetchColumns (state, rawData) {
       state.columns = rawData.data.list
+    },
+    fetchColumn (state, rawData) {
+      state.columns = [rawData.data]
+    },
+    fetchPosts (state, rawData) {
+      state.posts = rawData.data.list
+    },
+    setLoading (state, status) {
+      state.loading = status
     }
   },
   actions: {
-    fetchColumns (context) {
-      axios.get('/columns?currentPage=1&pageSize=5').then(res => {
-        context.commit('fetchColumns', res.data)
-      })
+    fetchColumns ({ commit }) {
+      getAndCommit('/columns?currentPage=1&pageSize=10', 'fetchColumns', commit)
+    },
+    fetchColumn ({ commit }, cid) {
+      getAndCommit(`/columns/${cid}`, 'fetchColumn', commit)
+    },
+    fetchPosts ({ commit }, cid) {
+      getAndCommit(`/columns/${cid}/posts?currentPage=1&pageSize=5`, 'fetchPosts', commit)
     }
   },
   getters: {
-    biggerColumnsLen (state) {
-      return state.columns.filter(c => c).length
-    },
     getColumnById: (state) => (id: string) => {
       return state.columns.find(c => c._id === id)
     },
     getPostsByCid: (state) => (cid: string) => {
-      return state.posts.filter(post => post.columnId === Number(cid))
+      return state.posts.filter(post => post.column === cid)
     }
   }
 })
