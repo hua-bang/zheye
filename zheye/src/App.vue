@@ -18,12 +18,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted, computed } from 'vue'
+import { defineComponent, reactive, ref, onMounted, computed, watch } from 'vue'
 import { ColumnProps, UserProps } from './store'
 import GlobalHeader from './components/GlobalHeader.vue'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { useStore } from 'vuex'
 import Loader from './components/Loader.vue'
+import createMessage from './components/createMessage'
 
 export default defineComponent({
   name: 'App',
@@ -36,9 +37,17 @@ export default defineComponent({
     const store = useStore()
     const currentUser = computed(() => store.state.user)
     const isLoading = computed(() => store.state.loading)
+    const error = computed(() => store.state.error)
+    watch(() => error.value.status, () => {
+      const { status, message } = error.value
+      if (status && message) {
+        createMessage(message, 'error')
+      }
+    })
     return {
       currentUser,
-      isLoading
+      isLoading,
+      error
     }
   }
 })
