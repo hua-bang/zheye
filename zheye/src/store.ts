@@ -1,5 +1,10 @@
 import { Commit, createStore } from 'vuex'
 import axios from 'axios'
+export interface ResponseType<P = {}> {
+  code: number;
+  msg: string;
+  data: P;
+}
 export interface UserProps {
   isLogin: boolean;
   nickName?: string;
@@ -7,10 +12,11 @@ export interface UserProps {
   column?: string;
   email?: string;
 }
-interface ImageProps {
+export interface ImageProps {
   _id?: string;
   url?: string;
   createdA?: string;
+  fitUrl?: string;
 }
 export interface ColumnProps {
   _id: string;
@@ -19,13 +25,14 @@ export interface ColumnProps {
   description: string;
 }
 export interface PostProps {
-  _id: string;
+  _id?: string;
   title: string;
   excerpt?: string;
   content?: string;
-  image?: ImageProps;
-  createdAt: string;
+  image?: ImageProps | string;
+  createdAt?: string;
   column: string;
+  author?: string;
 }
 export interface GlobalErrorProps {
   status: boolean;
@@ -64,6 +71,11 @@ const store = createStore<GlobalDataProps>({
       localStorage.setItem('token', token)
       axios.defaults.headers.common.Authorization = `Bearer ${token}`
     },
+    logout (state) {
+      state.token = ''
+      localStorage.removeItem('token')
+      delete axios.defaults.headers.common.Authorization
+    },
     createPost (state, newPost) {
       state.posts.push(newPost)
     },
@@ -88,16 +100,16 @@ const store = createStore<GlobalDataProps>({
   },
   actions: {
     fetchColumns ({ commit }) {
-      getAndCommit('/columns?currentPage=1&pageSize=10', 'fetchColumns', commit)
+      return getAndCommit('/columns?currentPage=1&pageSize=10', 'fetchColumns', commit)
     },
     fetchColumn ({ commit }, cid) {
-      getAndCommit(`/columns/${cid}`, 'fetchColumn', commit)
+      return getAndCommit(`/columns/${cid}`, 'fetchColumn', commit)
     },
     fetchPosts ({ commit }, cid) {
-      getAndCommit(`/columns/${cid}/posts?currentPage=1&pageSize=5`, 'fetchPosts', commit)
+      return getAndCommit(`/columns/${cid}/posts?currentPage=1&pageSize=5`, 'fetchPosts', commit)
     },
     fetchCurrentUser ({ commit }) {
-      getAndCommit('/user/current', 'fetchCurrentUser', commit)
+      return getAndCommit('/user/current', 'fetchCurrentUser', commit)
     },
     login ({ commit }, payload) {
       return postAndCommit('/user/login', 'login', commit, payload)
@@ -106,6 +118,9 @@ const store = createStore<GlobalDataProps>({
       return dispatch('login', loginData).then(() => {
         return dispatch('fetchCurrentUser')
       })
+    },
+    createPost ({ commit }, payload) {
+      return postAndCommit('posts', 'createPost', commit, payload)
     }
   },
   getters: {

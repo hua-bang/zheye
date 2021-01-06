@@ -33,7 +33,6 @@ export default defineComponent({
     Loader
   },
   setup (props) {
-    console.log(props)
     const store = useStore()
     const currentUser = computed(() => store.state.user)
     const isLoading = computed(() => store.state.loading)

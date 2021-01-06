@@ -11,6 +11,11 @@
         </div>
       </div>
     </section>
+    <uploader action="/upload" :beforeUpload="beforeUpload" @file-uploaded="onFileUploaded">
+      <template #uploaded="dataProps">
+          <img :src="dataProps.uploadedData.data.url" width="500">
+      </template>
+    </uploader>
     <h4 class="font-weight-bold text-center">发现精彩</h4>
     <column-list :list="list"></column-list>
     <div class="button-area" style="width:100%;display:flex;">
@@ -26,11 +31,14 @@
 import { defineComponent, computed, onMounted } from 'vue'
 import ColumnList from '../components/ColumnList.vue'
 import { useStore } from 'vuex'
-import { GlobalDataProps, ColumnProps } from '../store'
+import { GlobalDataProps, ColumnProps, ResponseType, ImageProps } from '../store'
+import Uploader from '../components/Uploader.vue'
+import createMessage from '../components/createMessage'
 export default defineComponent({
   name: 'home',
   components: {
-    ColumnList
+    ColumnList,
+    Uploader
   },
   setup (props) {
     console.log(props)
@@ -39,10 +47,22 @@ export default defineComponent({
       store.dispatch('fetchColumns')
     })
     const list = computed(() => store.state.columns)
+    const beforeUpload = (file: File) => {
+      const isJPG = file.type === 'image/jpeg'
+      if (!isJPG) {
+        createMessage('图片格式只能是jpg格式', 'error')
+      }
+      return isJPG
+    }
+    const onFileUploaded = (rawData: ResponseType<ImageProps>) => {
+      createMessage(`上传图片的ID ${rawData.data._id}`, 'success')
+    }
     const biggerColumnLen = computed(() => store.getters.biggerColumnsLen)
     return {
       list,
-      biggerColumnLen
+      biggerColumnLen,
+      beforeUpload,
+      onFileUploaded
     }
   }
 })
